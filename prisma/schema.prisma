@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ProdutoTipo {
+  JARDIM
+  FITA
+  FONTE
+  LAMPADA
+}
+
+enum TipoMedicao {
+  ESFERA_INTEGRADORA
+  GONIOFOTOMETRO
+}
+
+model Produto {
+  id         String             @id @default(uuid())
+  nome       String
+  tipo       ProdutoTipo
+  referencia String             @unique
+  parametros ParametroProduto[] // parâmetros padrão do produto
+  projetos   Projeto[] // projetos vinculados
+  criadoEm   DateTime           @default(now())
+}
+
+model ParametroProduto {
+  id        String  @id @default(uuid())
+  nome      String
+  valor     Float
+  unidade   String?
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produtoId String
+}
+
+model Projeto {
+  id        String    @id @default(uuid())
+  numero    String    @unique
+  produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produtoId String
+  amostras  Amostra[]
+  criadoEm  DateTime  @default(now())
+}
+
+model Amostra {
+  id        String    @id @default(uuid())
+  codigo    String // Ex: A, B, C...
+  projeto   Projeto   @relation(fields: [projetoId], references: [id], onDelete: Cascade)
+  projetoId String
+  medicoes  Medicao[]
+  criadoEm  DateTime  @default(now())
+
+  @@unique([codigo, projetoId])
+}
+
+model Medicao {
+  id          String             @id @default(uuid())
+  tipoMedicao TipoMedicao
+  parametros  ParametroMedicao[]
+  amostra     Amostra            @relation(fields: [amostraId], references: [id], onDelete: Cascade)
+  amostraId   String
+  criadoEm    DateTime           @default(now())
+}
+
+model ParametroMedicao {
+  id        String  @id @default(uuid())
+  nome      String
+  valor     Float
+  unidade   String?
+  medicao   Medicao @relation(fields: [medicaoId], references: [id], onDelete: Cascade)
+  medicaoId String
+}

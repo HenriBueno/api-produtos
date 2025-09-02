@@ -1,0 +1,2063 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Medições",
+    "version": "1.0.0",
+    "description": "Documentação da API de medições, parâmetros e amostras"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333",
+      "description": "Servidor local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Produto",
+      "description": "Operações relacionadas a produtos"
+    },
+    {
+      "name": "Projeto",
+      "description": "Operações relacionadas a projetos"
+    },
+    {
+      "name": "ParametroProduto",
+      "description": "Operações relacionadas aos parâmetros declarados do produto"
+    },
+    {
+      "name": "Amostra",
+      "description": "Operações relacionadas às amostras do projeto"
+    },
+    {
+      "name": "Medicao",
+      "description": "Operações relacionadas às medições das amostras"
+    },
+    {
+      "name": "ParametroMedicao",
+      "description": "Operações relacionadas aos parâmetros fotoelétricos das medições"
+    }
+  ],
+  "paths": {
+    "/produtos": {
+      "post": {
+        "summary": "Criar um novo produto",
+        "tags": ["Produto"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "tipo", "referencia"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Produto A"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "example": "Tipo X"
+                  },
+                  "referencia": {
+                    "type": "string",
+                    "example": "REF123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Produto criado com sucesso."
+                    },
+                    "data": { "$ref": "#/components/schemas/Produto" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatórios ausentes",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Campos obrigatórios faltando: nome, tipo e referencia"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Referência já existente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Essa referência já existe! Use uma referência única."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao criar o produto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao criar o produto."
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Produto"],
+        "summary": "Listar todos os produtos",
+        "responses": {
+          "200": {
+            "description": "Lista de produtos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "msg": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Produto" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno no servidor"
+          }
+        }
+      }
+    },
+    "/produtos/{id}": {
+      "get": {
+        "tags": ["Produto"],
+        "summary": "Obter um produto específico por ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "ID do produto"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "msg": { "type": "string" },
+                    "data": { "$ref": "#/components/schemas/Produto" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          },
+          "500": {
+            "description": "Erro interno no servidor"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Produto"],
+        "summary": "Atualizar um produto existente",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "Produto Atualizado" },
+                  "tipo": { "type": "string", "example": "Tipo Y" },
+                  "referencia": { "type": "string", "example": "REF456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Produto atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Produto modificado com sucesso."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nenhum campo para atualizar",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Nenhum campo para atualizar"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Produto não encontrado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Referência duplicada",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Essa referência já existe! Use uma referência única."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro no banco de dados"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Produto"],
+        "summary": "Deletar um produto",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produto deletado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Produto deletado com sucesso."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Produto não encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao deletar o produto"
+          }
+        }
+      }
+    },
+    "/projetos/{produtoId}": {
+      "get": {
+        "tags": ["Projeto"],
+        "summary": "Listar todos os projetos de um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projetos listados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Projetos listados com sucesso"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "example": "proj_123" },
+                          "numero": { "type": "string", "example": "001" },
+                          "produtoId": {
+                            "type": "string",
+                            "example": "prod_123"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Produto não encontrado" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar projetos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao listar projetos"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Projeto"],
+        "summary": "Criar um projeto para um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["numero"],
+                "properties": {
+                  "numero": { "type": "string", "example": "001" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Projeto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Projeto criado com sucesso"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "proj_123" },
+                        "numero": { "type": "string", "example": "001" },
+                        "produtoId": { "type": "string", "example": "prod_123" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campo 'numero' obrigatório",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Campo 'numero' é obrigatório"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Produto não encontrado" }
+              }
+            }
+          },
+          "409": {
+            "description": "Número do projeto já existe para o produto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Já existe um projeto com esse número para este produto."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao criar projeto",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Erro ao criar projeto" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projetos/{produtoId}/{id}": {
+      "get": {
+        "tags": ["Projeto"],
+        "summary": "Obter um projeto pelo id e produtoId",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projeto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Projeto encontrado com sucesso"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "proj_123" },
+                        "numero": { "type": "string", "example": "001" },
+                        "produtoId": { "type": "string", "example": "prod_123" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto não encontrado",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Projeto não encontrado" }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao buscar projeto",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Erro ao buscar projeto" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Projeto"],
+        "summary": "Atualizar um projeto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numero": { "type": "string", "example": "002" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Projeto atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Projeto atualizado com sucesso",
+                  "data": {
+                    "id": "proj_123",
+                    "numero": "002",
+                    "produtoId": "prod_123"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto não encontrado",
+            "content": {
+              "application/json": {
+                "example": { "success": false, "msg": "Projeto não encontrado" }
+              }
+            }
+          },
+          "409": {
+            "description": "Número do projeto já existe para o produto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Já existe outro projeto com esse número para este produto."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao atualizar projeto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao atualizar projeto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Projeto"],
+        "summary": "Deletar um projeto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projeto deletado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Projeto deletado com sucesso"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Projeto não encontrado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao deletar projeto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao deletar projeto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametroProduto/{produtoId}": {
+      "get": {
+        "tags": ["ParametroProduto"],
+        "summary": "Listar parâmetros de um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetros listados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetros listados com sucesso."
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ParametroProduto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Produto não encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar parâmetros",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao listar os parâmetros."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["ParametroProduto"],
+        "summary": "Criar um parâmetro para um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "valor"],
+                "properties": {
+                  "nome": { "type": "string", "example": "Peso" },
+                  "valor": { "type": "number", "example": 10.5 },
+                  "unidade": { "type": "string", "example": "kg" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parâmetro criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro criado com sucesso."
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ParametroProduto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatórios ausentes",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Campos obrigatórios: nome, valor, produtoId"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Produto não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Produto não encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao criar parâmetro",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao criar o parâmetro."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametroProduto/{produtoId}/{parametroId}": {
+      "put": {
+        "tags": ["ParametroProduto"],
+        "summary": "Atualizar um parâmetro de um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "parametroId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string", "example": "Altura" },
+                  "valor": { "type": "number", "example": 15.75 },
+                  "unidade": { "type": "string", "example": "cm" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parâmetro atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro atualizado com sucesso."
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ParametroProduto"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nenhum campo para atualizar fornecido",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Pelo menos um campo (nome, valor ou unidade) deve ser fornecido para atualizar."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parâmetro não encontrado para este produto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Parâmetro não encontrado para este produto."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao atualizar parâmetro",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao atualizar o parâmetro."
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["ParametroProduto"],
+        "summary": "Deletar um parâmetro de um produto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "parametroId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetro deletado com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Parâmetro deletado com sucesso."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parâmetro não encontrado para este produto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Parâmetro não encontrado para este produto."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao deletar parâmetro",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao deletar o parâmetro."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/amostra/{produtoId}/{projetoId}": {
+      "get": {
+        "tags": ["Amostra"],
+        "summary": "Listar amostras de um projeto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Amostras listadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Amostras listadas com sucesso"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Amostra" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto não encontrado para o produto informado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Projeto não encontrado para o produto informado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar amostras",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao listar amostras"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Amostra"],
+        "summary": "Criar uma nova amostra em um projeto",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["codigo"],
+                "properties": {
+                  "codigo": { "type": "string", "example": "AM123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Amostra criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Amostra criada com sucesso"
+                    },
+                    "data": { "$ref": "#/components/schemas/Amostra" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Amostra já existe para este projeto",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Amostra com código \"AM123\" já existe para este projeto."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto não encontrado para o produto informado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Projeto não encontrado para o produto informado"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao criar amostra",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao criar amostra"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/amostra/{produtoId}/{projetoId}/{amostraId}": {
+      "put": {
+        "tags": ["Amostra"],
+        "summary": "Atualizar uma amostra",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "codigo": { "type": "string", "example": "AM456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Amostra atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Amostra atualizada com sucesso"
+                    },
+                    "data": { "$ref": "#/components/schemas/Amostra" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Amostra não encontrada para o projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Amostra não encontrada para o projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao atualizar amostra",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao atualizar amostra"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Amostra"],
+        "summary": "Excluir uma amostra",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Amostra excluída com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Amostra excluída com sucesso"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Amostra não encontrada para o projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Amostra não encontrada para o projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao excluir amostra",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao excluir amostra"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicao/{produtoId}/{projetoId}/{amostraId}": {
+      "get": {
+        "tags": ["Medicao"],
+        "summary": "Listar medições de uma amostra",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medições listadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Medições listadas com sucesso"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Medicao" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Amostra não encontrada no projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Amostra não encontrada no projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar medições",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao listar medições"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Medicao"],
+        "summary": "Criar uma nova medição para uma amostra",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["tipoMedicao"],
+                "properties": {
+                  "tipoMedicao": {
+                    "type": "string",
+                    "example": "ESFERA_INTEGRADORA"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Medição criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Medição criada com sucesso"
+                    },
+                    "data": { "$ref": "#/components/schemas/Medicao" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Amostra não encontrada no projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Amostra não encontrada no projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao criar medição",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao criar medição"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/medicao/{produtoId}/{projetoId}/{amostraId}/{medicaoId}": {
+      "put": {
+        "tags": ["Medicao"],
+        "summary": "Atualizar uma medição",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tipoMedicao": {
+                    "type": "string",
+                    "example": "ESFERA_INTEGRADORA"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Medição atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Medição atualizada com sucesso"
+                    },
+                    "data": { "$ref": "#/components/schemas/Medicao" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Medição não encontrada para a amostra, projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Medição não encontrada para a amostra, projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao atualizar medição",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao atualizar medição"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Medicao"],
+        "summary": "Excluir uma medição",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medição excluída com sucesso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "msg": "Medição excluída com sucesso"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Medição não encontrada para a amostra, projeto e produto informados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Medição não encontrada para a amostra, projeto e produto informados"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao excluir medição",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "msg": "Erro ao excluir medição"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametro-medicao/{produtoId}/{projetoId}/{amostraId}/{medicaoId}": {
+      "get": {
+        "tags": ["ParametroMedicao"],
+        "summary": "Listar parâmetros de uma medição",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetros listados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetros listados com sucesso"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ParametroMedicao"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Medição não encontrada no contexto informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Medição não encontrada no contexto informado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao listar parâmetros",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Erro ao listar parâmetros"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar parâmetro de medição",
+        "tags": ["ParametroMedicao"],
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Temperatura"
+                  },
+                  "valor": {
+                    "type": "number",
+                    "example": 22.5
+                  },
+                  "unidade": {
+                    "type": "string",
+                    "example": "°C"
+                  }
+                },
+                "required": ["nome", "valor", "unidade"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Parâmetro criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro criado com sucesso"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ParametroMedicao"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro já existe na medição",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro com nome \"Temperatura\" já existe nessa medição."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Medição não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Medição não encontrada no contexto informado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao criar parâmetro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Erro ao criar parâmetro"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/parametro-medicao/{produtoId}/{projetoId}/{amostraId}/{medicaoId}/{parametroId}": {
+      "put": {
+        "tags": ["ParametroMedicao"],
+        "summary": "Atualizar um parâmetro existente",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "parametroId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "valor", "unidade"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Temperatura"
+                  },
+                  "valor": {
+                    "type": "number",
+                    "example": 25.6
+                  },
+                  "unidade": {
+                    "type": "string",
+                    "example": "°C"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parâmetro atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro atualizado com sucesso"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ParametroMedicao"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Já existe um parâmetro com esse nome nesta medição",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Já existe um parâmetro com nome \"Temperatura\" nesta medição."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parâmetro não encontrado no contexto informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro não encontrado no contexto informado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao atualizar parâmetro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Erro ao atualizar parâmetro"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["ParametroMedicao"],
+        "summary": "Excluir um parâmetro",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "projetoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "amostraId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "medicaoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "parametroId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parâmetro excluído com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro excluído com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Parâmetro não encontrado no contexto informado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Parâmetro não encontrado no contexto informado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno ao excluir parâmetro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": false },
+                    "msg": {
+                      "type": "string",
+                      "example": "Erro ao excluir parâmetro"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Produto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "prod_123" },
+          "nome": { "type": "string", "example": "Produto A" },
+          "tipo": { "type": "string", "example": "JARDIM" },
+          "referencia": { "type": "string", "example": "REF123" }
+        }
+      },
+      "Projeto": {
+        "type": "object",
+        "require": "numero",
+        "properties": {
+          "id": { "type": "string", "example": "proj_123" },
+          "numero": { "type": "string", "example": "BR-JRDM-XXXX-XX/XX" },
+          "produtoId": { "type": "string", "example": "prod_123" }
+        }
+      },
+      "ParametroProduto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "param_123" },
+          "nome": { "type": "string", "example": "Potencia" },
+          "valor": { "type": "number", "example": 10.5 },
+          "unidade": { "type": "string", "example": "W" },
+          "produtoId": { "type": "string", "example": "prod_123" }
+        }
+      },
+      "Amostra": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "amostra_123" },
+          "codigo": { "type": "string", "example": "A" },
+          "projetoId": { "type": "string", "example": "proj_123" }
+        }
+      },
+      "Medicao": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "example": "medicao_123" },
+          "tipoMedicao": { "type": "string", "example": "ESFERA_INTEGRADORA" },
+          "amostraId": { "type": "string", "example": "amostra_123" }
+        }
+      },
+      "ParametroMedicao": {
+        "type": "object",
+        "required": ["nome", "valor", "unidade"],
+        "properties": {
+          "id": { "type": "string", "example": "par123" },
+          "nome": { "type": "string", "example": "TCC" },
+          "valor": { "type": "number", "example": 2700 },
+          "unidade": { "type": "string", "example": "K" },
+          "medicaoId": { "type": "string", "example": "medicao_123" }
+        }
+      }
+    }
+  }
+}
