@@ -17,6 +17,10 @@ const routes = () => {
     controller.update(req, res);
   });
 
+  router.get("/:produtoId/:projetoId/:amostraId/:medicaoId", (req, res) => {
+    controller.show(req, res);
+  });
+
   router.delete("/:produtoId/:projetoId/:amostraId/:medicaoId", (req, res) => {
     controller.delete(req, res);
   });

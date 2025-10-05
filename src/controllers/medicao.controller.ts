@@ -168,6 +168,45 @@ class MedicaoController {
       });
     }
   }
+  
+  async show(req: Request, res: Response) {
+  const { produtoId, projetoId, amostraId, medicaoId } = req.params;
+
+  try {
+    const medicao = await db.medicao.findFirst({
+      where: {
+        id: medicaoId,
+        amostra: {
+          id: amostraId,
+          projeto: {
+            id: projetoId,
+            produtoId,
+          },
+        },
+      },
+    });
+
+    if (!medicao) {
+      return res.status(404).json({
+        success: false,
+        msg: "Medição não encontrada para a amostra, projeto e produto informados",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      msg: "Medição retornada com sucesso",
+      data: medicao,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      msg: "Erro ao buscar medição",
+    });
+  }
+}
+
 }
 
 export default MedicaoController;
